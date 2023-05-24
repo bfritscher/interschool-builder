@@ -57,13 +57,14 @@ def build(org, repo, override=''):
             "-l", "traefik.http.middlewares.https_redirect.redirectscheme.scheme=https",
             "-l", "traefik.http.middlewares.https_redirect.redirectscheme.permanent=true",
             "-l", f"traefik.http.services.{repo_lower}.loadbalancer.server.port={port}",
-            "-l", f"traefik.http.routers.{repo_lower}.rule=Host(`builder.rxq.ch`)",
+            "-l", f"traefik.http.routers.{repo_lower}.rule=Host(`{repo_lower}.rxq.ch`)",
             "-l", f"traefik.http.routers.{repo_lower}.entrypoints=web",
             "-l", f"traefik.http.routers.{repo_lower}.middlewares=https_redirect",
             "-l", f"traefik.http.routers.{repo_lower}_secured.rule=Host(`{repo_lower}.rxq.ch`)",
             "-l", f"traefik.http.routers.{repo_lower}_secured.entrypoints=websecure",
             "-l", f"traefik.http.routers.{repo_lower}_secured.tls=true",
             "-l", f"traefik.http.routers.{repo_lower}_secured.tls.certresolver=myresolver",
+            "--network", "web"
         ]
 
     if result.returncode == 0:
