@@ -18,6 +18,10 @@ def webhook():
 
     return f'OK {request.args.to_dict()}'
 
+@app.route('/build', methods=['GET'])
+def build_sync():
+    build(**request.args.to_dict())
+    return f'OK {request.args.to_dict()}'
 
 def build(org, repo, override=''):
     GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
