@@ -26,10 +26,10 @@ def build_sync():
 
 def build(org, repo, override=''):
     GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
-    repo_lower = repo.lower().split('-')[1]
+    repo_lower = repo.lower().replace('project-', '')
 
     image_name = repo
-    workdir = f'/app/data/{repo}{override}'
+    workdir = f'/app/data/{repo}{override[:-1]}'
 
     subprocess.run(['docker', 'rm', '-f', repo])
     subprocess.run(['docker', 'rmi', '-f', image_name])
