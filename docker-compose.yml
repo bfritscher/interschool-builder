@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  interschool-builder:
+    build: .
+    restart: always
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock.raw:/var/run/docker.sock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.middlewares.https_redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https_redirect.redirectscheme.permanent=true"
+      - "traefik.http.services.sentry.loadbalancer.server.port=5000"
+      - "traefik.http.routers.sentry.rule=Host(`builder.rxq.ch`)"
+      - "traefik.http.routers.sentry.entrypoints=web"
+      - "traefik.http.routers.sentry.middlewares=https_redirect"
+      - "traefik.http.routers.sentry_secured.rule=Host(`builder.rxq.ch`)"
+      - "traefik.http.routers.sentry_secured.entrypoints=websecure"
+      - "traefik.http.routers.sentry_secured.tls=true"
+      - "traefik.http.routers.sentry_secured.tls.certresolver=myresolver"
+    networks:
+      - web
+      - default
+networks:
+  web:
+    external: true
