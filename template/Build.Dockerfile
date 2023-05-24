@@ -1,4 +1,9 @@
 FROM node:18 AS frontend
+ENV DJANGO_SUPERUSER_USERNAME=autoadmin
+ENV DJANGO_SUPERUSER_EMAIL=autoadmin@example.com
+ENV DJANGO_SUPERUSER_PASSWORD=heg
+ENV DJANGO_SUPERUSER_FIRST_NAME=auto
+ENV DJANGO_SUPERUSER_LAST_NAME=admin
 WORKDIR /app
 COPY package.json /app/package.json
 RUN npm install
@@ -13,9 +18,7 @@ RUN pip install -r requirements.txt
 COPY . /app
 RUN sed -i '/django.middleware.clickjacking.XFrameOptionsMiddleware/d' backend/settings/base.py
 COPY --from=frontend /app/dist /app/dist
-ENV DJANGO_SUPERUSER_USERNAME=autoadmin
-ENV DJANGO_SUPERUSER_EMAIL=autoadmin@example.com
-ENV DJANGO_SUPERUSER_PASSWORD=heg
+
 RUN python manage.py migrate
 RUN python manage.py createsuperuser --no-input
 CMD python manage.py runserver 0.0.0.0:8000
