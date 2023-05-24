@@ -12,14 +12,14 @@ services:
       - "traefik.docker.network=web"
       - "traefik.http.middlewares.https_redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.https_redirect.redirectscheme.permanent=true"
-      - "traefik.http.services.sentry.loadbalancer.server.port=5000"
-      - "traefik.http.routers.sentry.rule=Host(`builder.rxq.ch`)"
-      - "traefik.http.routers.sentry.entrypoints=web"
-      - "traefik.http.routers.sentry.middlewares=https_redirect"
-      - "traefik.http.routers.sentry_secured.rule=Host(`builder.rxq.ch`)"
-      - "traefik.http.routers.sentry_secured.entrypoints=websecure"
-      - "traefik.http.routers.sentry_secured.tls=true"
-      - "traefik.http.routers.sentry_secured.tls.certresolver=myresolver"
+      - "traefik.http.services.builder.loadbalancer.server.port=5000"
+      - "traefik.http.routers.builder.rule=Host(`builder.rxq.ch`)"
+      - "traefik.http.routers.builder.entrypoints=web"
+      - "traefik.http.routers.builder.middlewares=https_redirect"
+      - "traefik.http.routers.builder_secured.rule=Host(`builder.rxq.ch`)"
+      - "traefik.http.routers.builder_secured.entrypoints=websecure"
+      - "traefik.http.routers.builder_secured.tls=true"
+      - "traefik.http.routers.builder_secured.tls.certresolver=myresolver"
     networks:
       - web
       - default
