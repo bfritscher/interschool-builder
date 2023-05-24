@@ -46,6 +46,8 @@ def build(org, repo, override=''):
     # Copy the Dockerfile into the repository
     subprocess.run(['cp', '/app/template/Build.Dockerfile',
                    f'./Dockerfile'], cwd=workdir)
+    subprocess.run(['cp', '/app/template/dockerignore',
+                   f'./.dockerignore'], cwd=workdir)
 
     # Build the Docker image and save the logs to a file
     app.logger.info(f'BUILD {repo} STARTED')

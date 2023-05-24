@@ -1,7 +1,7 @@
 FROM node:18 AS frontend
 WORKDIR /app
 COPY package.json /app/package.json
-RUN rm -rf node_modules && npm install
+RUN npm install
 COPY . /app
 RUN sed -i 's/baseURL: .*/baseURL: "\/api",/' src/services/api.js
 RUN npm run build
