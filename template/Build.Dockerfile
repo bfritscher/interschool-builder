@@ -11,6 +11,7 @@ WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
 COPY . /app
+RUN sed -i '/django.middleware.clickjacking.XFrameOptionsMiddleware/d' backend/settings/base.py
 COPY --from=frontend /app/dist /app/dist
 ENV DJANGO_SUPERUSER_USERNAME=autoadmin
 ENV DJANGO_SUPERUSER_EMAIL=autoadmin@example.com
