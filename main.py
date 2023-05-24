@@ -73,7 +73,7 @@ def build(org, repo, override=''):
 
     if result.returncode == 0:
         app.logger.info(f'BUILD {repo} SUCCESS')
-        result = subprocess.run(['docker', 'run', '-d', '--rm', '--name', repo, '-p', '8000:8000']
+        result = subprocess.run(['docker', 'run', '-d', '--rm', '--name', repo]
                                  + labels(repo_lower, 8000) + [image_name])
     else:
         app.logger.info(f'BUILD {repo} FAILED')
@@ -83,7 +83,7 @@ def build(org, repo, override=''):
         subprocess.run(['docker', 'build', '-t', image_name,
                        '.'], capture_output=True, cwd=workdir)
         subprocess.run(['docker', 'run', '-d', '--rm', '--name',
-                       repo, '-p', '8000:80']
+                       repo]
                        + labels(repo_lower, 80) + [image_name])
     app.logger.info(f'CONTAINER {repo} STARTED')
 
