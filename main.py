@@ -26,7 +26,7 @@ def build_sync():
 
 def build(org, repo, override=''):
     GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
-    repo_lower = repo.lower().replace('project-', '')
+    repo_lower = repo.lower().replace('project-', '').replace('_', '-')
 
     image_name = repo
     workdir = f'/app/data/{repo}{override[:-1]}'
