@@ -53,7 +53,7 @@ def build(org, repo, override=''):
     app.logger.info(f'BUILD {repo} STARTED')
     result = subprocess.run(
         ['docker', 'build', '-t', image_name, '.'], capture_output=True, cwd=workdir)
-    with open(f'./data/{repo}/build.log', 'wb') as f:
+    with open(f'./data/{repo}{override}/build.log', 'wb') as f:
         f.write(result.stdout)
         f.write(result.stderr)
 
