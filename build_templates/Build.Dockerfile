@@ -17,7 +17,7 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
 COPY . /app
 RUN sed -i '/django.middleware.clickjacking.XFrameOptionsMiddleware/d' backend/settings/base.py
-RUN sed -i '/django.middleware.csrf.CsrfViewMiddleware/d' backend/settings/base.py
+
 COPY --from=frontend /app/dist /app/dist
 
 RUN python manage.py migrate

@@ -48,6 +48,8 @@ def build(org, repo, override=''):
                    f'./Dockerfile'], cwd=workdir)
     subprocess.run(['cp', '/app/build_templates/dockerignore',
                    f'./.dockerignore'], cwd=workdir)
+    subprocess.run(['cp', '/app/build_templates/prod.py',
+                   f'./prod.py'], cwd=workdir)
 
     # Build the Docker image and save the logs to a file
     app.logger.info(f'BUILD {repo} STARTED')
@@ -76,7 +78,8 @@ def build(org, repo, override=''):
 
     if result.returncode == 0:
         app.logger.info(f'BUILD {repo} SUCCESS')
-        result = subprocess.run(['docker', 'run', '-d', '--rm', '--name', repo]
+        result = subprocess.run(['docker', 'run', '-d', '--rm', '--name', repo, '-e',
+                                 f'DJANGO_ALLOWED_HOST=https://{repo_lower}.rxq.ch']
                                  + labels(repo_lower, 8000) + [image_name])
     else:
         app.logger.info(f'BUILD {repo} FAILED')
