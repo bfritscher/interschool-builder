@@ -2,7 +2,7 @@ import os
 import subprocess
 from threading import Thread
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -10,7 +10,7 @@ CORS(app)
 
 @app.route('/', methods=['GET'])
 def index():
-    return 'Builder'
+    return render_template('index.html')
 
 
 @app.route('/webhook', methods=['GET'])
@@ -44,9 +44,9 @@ def build(org, repo, override=''):
         -H \'Cache-Control: no-cache\' https://api.github.com/repos/{org}/{repo}/tarball | tar xz --strip-components=1'])
 
     # Copy the Dockerfile into the repository
-    subprocess.run(['cp', '/app/template/Build.Dockerfile',
+    subprocess.run(['cp', '/app/build_templates/Build.Dockerfile',
                    f'./Dockerfile'], cwd=workdir)
-    subprocess.run(['cp', '/app/template/dockerignore',
+    subprocess.run(['cp', '/app/build_templates/dockerignore',
                    f'./.dockerignore'], cwd=workdir)
 
     # Build the Docker image and save the logs to a file
@@ -82,7 +82,7 @@ def build(org, repo, override=''):
         app.logger.info(f'BUILD {repo} FAILED')
         # serve logs with Nginx
         subprocess.run(
-            ['sh', '-c', 'cp /app/template/Nginx.Dockerfile ./Dockerfile && cp /app/template/index.html ./index.html'], cwd=workdir)
+            ['sh', '-c', 'cp /app/build_templates/Nginx.Dockerfile ./Dockerfile && cp /app/build_templates/index.html ./index.html'], cwd=workdir)
         subprocess.run(['docker', 'build', '-t', image_name,
                        '.'], capture_output=True, cwd=workdir)
         subprocess.run(['docker', 'run', '-d', '--rm', '--name',
