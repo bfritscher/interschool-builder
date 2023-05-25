@@ -39,12 +39,12 @@ def index():
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    if request.json.repository.name.startswith("project") and request.json.ref == "refs/heads/main":
+    if request.json["repository"]["name"].startswith("project") and request.json["ref"] == "refs/heads/main":
         commit_id = None
-        if request.json.head_commit:
-            commit_id = request.json.head_commit.id
-        repo = request.json.repository.name
-        org = request.json.repository.organization
+        if request.json["head_commit"]:
+            commit_id = request.json["head_commit"]["id"]
+        repo = request.json["repository"]["name"]
+        org = request.json["repository"]["organization"]
         override = OVERRIDES.get(repo, "")
         Thread(target=build, kwargs={
                "org": org, "repo": repo, "override": override, "commit_id": commit_id}).start()
