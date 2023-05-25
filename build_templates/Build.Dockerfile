@@ -17,9 +17,9 @@ COPY requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
 COPY . /app
 RUN sed -i '/django.middleware.clickjacking.XFrameOptionsMiddleware/d' backend/settings/base.py
-RUN cat /app/prod.py >> backend/settings/base.py
 COPY --from=frontend /app/dist /app/dist
 
 RUN python manage.py migrate
 RUN python manage.py createsuperuser --no-input
+RUN cat /app/prod.py >> backend/settings/base.py
 CMD python manage.py runserver 0.0.0.0:8000
