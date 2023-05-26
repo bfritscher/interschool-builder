@@ -22,4 +22,4 @@ COPY --from=frontend /app/dist /app/dist
 RUN python manage.py migrate
 RUN python manage.py createsuperuser --no-input
 RUN cat /app/prod.py >> backend/settings/base.py
-CMD python manage.py runserver 0.0.0.0:8000
+CMD python manage.py loaddata ./backend/*/*fixture*/*.json 2>/dev/null && python manage.py runserver 0.0.0.0:8000
