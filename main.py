@@ -2,7 +2,9 @@ import os
 import requests as request_client
 import json
 import subprocess
+import time
 from threading import Thread
+
 
 from flask import Flask, request, render_template
 from flask_cors import CORS
@@ -34,7 +36,7 @@ CORS(app)
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    return render_template('index.html', projects=OVERRIDES, now=time.time())
 
 
 @app.route('/webhook', methods=['POST'])
