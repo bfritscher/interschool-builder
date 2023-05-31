@@ -12,6 +12,8 @@ ENV DJANGO_SUPERUSER_EMAIL=autoadmin@example.com
 ENV DJANGO_SUPERUSER_PASSWORD=heg
 ENV DJANGO_SUPERUSER_FIRST_NAME=auto
 ENV DJANGO_SUPERUSER_LAST_NAME=admin
+RUN apk add --update-cache git \
+  && rm -rf /var/cache/apk/*
 WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
