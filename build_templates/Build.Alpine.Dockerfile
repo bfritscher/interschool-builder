@@ -22,7 +22,7 @@ RUN sed -i '/django.middleware.clickjacking.XFrameOptionsMiddleware/d' backend/s
 COPY --from=frontend /app/dist /app/dist
 
 RUN python manage.py migrate
-RUN python manage.py createsuperuser --no-input
 RUN python manage.py loaddata ./backend/*/*fixture*/*.json; exit 0
+RUN python manage.py createsuperuser --no-input
 RUN cat /app/prod.py >> backend/settings/base.py
 CMD python manage.py runserver 0.0.0.0:8000
