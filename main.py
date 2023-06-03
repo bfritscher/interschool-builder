@@ -83,7 +83,7 @@ def build(org, repo, override='', commit_id=None):
     subprocess.run(['cp', '/app/build_templates/prod.py',
                    f'./prod.py'], cwd=workdir)
     subprocess.run(['cp', '/app/build_templates/smtp.py',
-                   f'./smtp.py'], cwd=workdir)
+                   f'./backend/settings/smtp.py'], cwd=workdir)
 
     def run_build_cmd(image_type):
         # Build the Docker image and save the logs to a file

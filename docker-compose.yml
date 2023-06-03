@@ -38,6 +38,9 @@ services:
       - "traefik.http.routers.mail_secured.entrypoints=websecure"
       - "traefik.http.routers.mail_secured.tls=true"
       - "traefik.http.routers.mail_secured.tls.certresolver=myresolver"
+    environment:
+      - MP_SMTP_AUTH_ACCEPT_ANY=True
+      - MP_SMTP_AUTH_ALLOW_INSECURE=True
     networks:
       - web      
 networks:
