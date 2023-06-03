@@ -82,6 +82,8 @@ def build(org, repo, override='', commit_id=None):
                    f'./.dockerignore'], cwd=workdir)
     subprocess.run(['cp', '/app/build_templates/prod.py',
                    f'./prod.py'], cwd=workdir)
+    subprocess.run(['cp', '/app/build_templates/smtp.py',
+                   f'./smtp.py'], cwd=workdir)
 
     def run_build_cmd(image_type):
         # Build the Docker image and save the logs to a file
@@ -108,6 +110,7 @@ def build(org, repo, override='', commit_id=None):
                 "-l", f"traefik.http.routers.{repo_lower}_secured.entrypoints=websecure",
                 "-l", f"traefik.http.routers.{repo_lower}_secured.tls=true",
                 "-l", f"traefik.http.routers.{repo_lower}_secured.tls.certresolver=myresolver",
+                "-e", f"PROJECT_NAME={repo_lower}",
                 "--network", "web"
             ]
         state = 'failure'

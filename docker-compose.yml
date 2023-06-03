@@ -22,7 +22,24 @@ services:
       - "traefik.http.routers.builder_secured.tls.certresolver=myresolver"
     networks:
       - web
-      - default
+  mail:
+    image: axllent/mailpit
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.middlewares.https_redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https_redirect.redirectscheme.permanent=true"
+      - "traefik.http.services.mail.loadbalancer.server.port=8025"
+      - "traefik.http.routers.mail.rule=Host(`mail.rxq.ch`)"
+      - "traefik.http.routers.mail.entrypoints=web"
+      - "traefik.http.routers.mail.middlewares=https_redirect"
+      - "traefik.http.routers.mail_secured.rule=Host(`mail.rxq.ch`)"
+      - "traefik.http.routers.mail_secured.entrypoints=websecure"
+      - "traefik.http.routers.mail_secured.tls=true"
+      - "traefik.http.routers.mail_secured.tls.certresolver=myresolver"
+    networks:
+      - web      
 networks:
   web:
     external: true
