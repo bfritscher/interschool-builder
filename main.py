@@ -31,6 +31,7 @@ OVERRIDES = {
     'project-qarbon': '/'
 }
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
 CORS(app)
 
 
