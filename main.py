@@ -3,6 +3,7 @@ import requests as request_client
 import json
 import subprocess
 import time
+import logging
 from threading import Thread
 
 
