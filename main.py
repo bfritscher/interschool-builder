@@ -3,6 +3,7 @@ import requests as request_client
 import json
 import subprocess
 import time
+import logging
 from threading import Thread
 
 
@@ -15,6 +16,7 @@ CHECK_PREFIX = 'g-'
 
 OVERRIDES = {}
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
 CORS(app)
 
 
