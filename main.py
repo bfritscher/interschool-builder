@@ -11,37 +11,23 @@ from flask_cors import CORS
 
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
 
-OVERRIDES = {
-    'project-anemone': '/',
-    'project-bluedaboudidaboudadaboudidabouda': '/',
-    'project-crocodiles': '/',
-    'project-dtf': '/www/',
-    'project-e_tsuki': '/',
-    'project-fennec': '/',
-    'project-g-unit': '/template_django_vue/',
-    'project-helloworld': '/',
-    'project-ilicoptere': '/django-vue/',
-    'project-jungle': '/',
-    'project-komanodragons': '/django-vue/',
-    'project-lima': '/',
-    'project-maverick': '/',
-    'project-nova': '/template-django-vue-main/',
-    'project-omega': '/Omega/',
-    'project-pepperoni': '/Project-Pepperoni/',
-    'project-qarbon': '/'
-}
+CHECK_PREFIX = 'g-'
+
+OVERRIDES = {}
 app = Flask(__name__)
 CORS(app)
 
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html', projects=OVERRIDES, now=time.time())
+    path = "/app/data"
+    projects = [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
+    return render_template('index.html', projects=projects, now=time.time(), prefix=CHECK_PREFIX)
 
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    if request.json["repository"]["name"].startswith("project") and request.json["ref"] == "refs/heads/main":
+    if request.json["repository"]["name"].startswith(CHECK_PREFIX) and request.json["ref"] == "refs/heads/main":
         commit_id = None
         if request.json["head_commit"]:
             commit_id = request.json["head_commit"]["id"]
@@ -60,7 +46,7 @@ def build_sync():
     return f'OK {request.args.to_dict()}'
 
 def build(org, repo, override='', commit_id=None):
-    repo_lower = repo.lower().replace('project-', '').replace('_', '-')
+    repo_lower = repo.lower().replace(CHECK_PREFIX, '')
 
     image_name = repo
     workdir = f'/app/data/{repo}{override[:-1]}'
