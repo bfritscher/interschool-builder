@@ -23,7 +23,7 @@ CORS(app)
 @app.route('/', methods=['GET'])
 def index():
     path = "/app/data"
-    projects = [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
+    projects = [name for name in sorted(os.listdir(path)) if os.path.isdir(os.path.join(path, name))]
     return render_template('index.html', projects=projects, now=time.time(), prefix=CHECK_PREFIX)
 
 
