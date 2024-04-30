@@ -104,7 +104,7 @@ def build(org, repo, override='', commit_id=None):
         state = 'failure'
         if result.returncode == 0:
             app.logger.info(f'BUILD {repo} SUCCESS')
-            result = subprocess.run(['docker', 'run', '-d', '--rm', '--name', repo, '-e',
+            result = subprocess.run(['docker', 'run', '-d', '--restart=always', '--name', repo, '-e',
                                     f'DJANGO_ALLOWED_HOST=https://{repo_lower}.rxq.ch']
                                     + labels(repo_lower, 8000) + [image_name])
             state = 'success'
@@ -117,7 +117,7 @@ def build(org, repo, override='', commit_id=None):
                 ['sh', '-c', 'cp /app/build_templates/Nginx.Dockerfile ./Dockerfile && cp /app/build_templates/index.html ./index.html'], cwd=workdir)
             subprocess.run(['docker', 'build', '-t', image_name,
                         '.'], capture_output=True, cwd=workdir)
-            subprocess.run(['docker', 'run', '-d', '--rm', '--name',
+            subprocess.run(['docker', 'run', '-d', '--restart=always', '--name',
                         repo]
                         + labels(repo_lower, 80) + [image_name])
         return state
