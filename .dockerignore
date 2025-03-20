@@ -1,2 +1,4 @@
 data/
 docker-compose.*
+videos/**/*.mp4
+.git
