@@ -4,6 +4,7 @@ import json
 import subprocess
 import time
 import logging
+import datetime
 from threading import Thread
 
 
@@ -19,6 +20,39 @@ app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 CORS(app)
 
+# Function to inject build information into build.html
+def inject_build_info(workdir, commit_id, org=None, repo=None):
+    build_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    commit_id = commit_id or "unknown-commit"
+    
+    # Read the template file
+    template_path = '/app/build_templates/build.html'
+    output_path = f'{workdir}/build.html'
+    
+    try:
+        with open(template_path, "r") as f:
+            content = f.read()
+    
+        content = content.replace("%%COMMIT_ID%%", commit_id)
+        content = content.replace("%%BUILD_DATE%%", build_date)
+        
+        # Add GitHub repo information if available
+        if org and repo and commit_id and commit_id != "unknown-commit":
+            github_url = f"https://github.com/{org}/{repo}/commit/{commit_id}"
+            content = content.replace("%%GITHUB_URL%%", github_url)
+            content = content.replace("%%GITHUB_REPO%%", f"{org}/{repo}")
+        else:
+            content = content.replace("%%GITHUB_URL%%", "#")
+            content = content.replace("%%GITHUB_REPO%%", "Unknown repository")
+        
+        with open(output_path, "w") as f:
+            f.write(content)
+        
+        app.logger.info(f'Build information injected. Commit ID: {commit_id}, Build Date: {build_date}')
+        return True
+    except Exception as e:
+        app.logger.error(f'Error injecting build information: {str(e)}')
+        return False
 
 @app.route('/', methods=['GET'])
 def index():
@@ -65,6 +99,7 @@ def build(org, repo, override='', commit_id=None):
     curl -SsL -H "Accept: application/vnd.github+json" -H \'Authorization: Bearer {GITHUB_TOKEN}\' \
         -H \'Cache-Control: no-cache\' https://api.github.com/repos/{org}/{repo}/tarball | tar xz --strip-components=1'])
 
+    inject_build_info(workdir, commit_id, org, repo)
     # Copy the Dockerfile into the repository
     subprocess.run(['cp', '/app/build_templates/dockerignore',
                    f'./.dockerignore'], cwd=workdir)
