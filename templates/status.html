@@ -32,7 +32,7 @@
                 <div class="col-md-4">
                     <div class="card build-card">
                         <div class="card-header d-flex justify-content-between">
-                            <strong>{{ build.org }}/{{ build.repo }}</strong>
+                            <strong>{{ build.repo }}</strong>
                             <span class="status-running">Running</span>
                         </div>
                         <div class="card-body">
@@ -65,7 +65,7 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Repository</th>
+                        <th>Website</th>
                         <th>Commit</th>
                         <th>Status</th>
                         <th>Started</th>
@@ -77,7 +77,7 @@
                     {% if build_history %}
                         {% for build in build_history %}
                         <tr>
-                            <td>{{ build.org }}/{{ build.repo }}</td>
+                            <td><a target="_blank" href="https://{{ build.repo.lower().replace(prefix, '') }}.rxq.ch">{{ build.repo }}</a></td>
                             <td>
                                 {% if build.commit_id %}
                                 <a href="https://github.com/{{ build.org }}/{{ build.repo }}/commit/{{ build.commit_id }}" 

@@ -130,7 +130,8 @@ def status_page():
     return render_template('status.html', 
                           active_builds=active_builds, 
                           build_history=history, 
-                          now=datetime.datetime.now(SERVER_TZ))
+                          now=datetime.datetime.now(SERVER_TZ),
+                          prefix=CHECK_PREFIX)
 
 
 def build(org, repo, override='', commit_id=None):
