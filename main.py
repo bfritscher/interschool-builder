@@ -5,10 +5,10 @@ import subprocess
 import time
 import logging
 import datetime
-from threading import Thread
+from threading import Thread, Lock
 
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 from flask_cors import CORS
 
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
@@ -19,6 +19,41 @@ OVERRIDES = {}
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 CORS(app)
+
+# Build status tracking
+build_threads = {}
+build_history = []
+build_lock = Lock()
+MAX_HISTORY = 50  # Maximum number of builds to keep in history
+
+# Function to update build status
+def update_build_status(org, repo, status, start_time=None, end_time=None, state=None):
+    with build_lock:
+        build_id = f"{org}/{repo}"
+        
+        if status == "started":
+            build_threads[build_id] = {
+                "org": org,
+                "repo": repo,
+                "status": "building",
+                "start_time": start_time or datetime.datetime.now(),
+                "state": "running"
+            }
+        elif status == "finished":
+            if build_id in build_threads:
+                build_info = build_threads[build_id]
+                build_info["status"] = "completed"
+                build_info["end_time"] = end_time or datetime.datetime.now()
+                build_info["duration"] = (build_info["end_time"] - build_info["start_time"]).total_seconds()
+                build_info["state"] = state or "unknown"
+                
+                # Add to history and remove from active builds
+                build_history.insert(0, build_info.copy())
+                del build_threads[build_id]
+                
+                # Limit history size
+                if len(build_history) > MAX_HISTORY:
+                    build_history.pop()
 
 # Function to inject build information into build.html
 def inject_build_info(workdir, commit_id, org=None, repo=None):
@@ -81,8 +116,22 @@ def build_sync():
     build(**request.args.to_dict())
     return f'OK {request.args.to_dict()}'
 
+@app.route('/status', methods=['GET'])
+def status_page():
+    with build_lock:
+        active_builds = list(build_threads.values())
+        history = build_history.copy()
+    
+    return render_template('status.html', 
+                          active_builds=active_builds, 
+                          build_history=history, 
+                          now=datetime.datetime.now())
+
+
 def build(org, repo, override='', commit_id=None):
     repo_lower = repo.lower().replace(CHECK_PREFIX, '')
+    start_time = datetime.datetime.now()
+    update_build_status(org, repo, "started", start_time)
 
     image_name = repo
     workdir = f'/app/data/{repo}{override[:-1]}'
@@ -156,8 +205,13 @@ def build(org, repo, override='', commit_id=None):
                         repo]
                         + labels(repo_lower, 80) + [image_name])
         return state
+    
     state = run_build_cmd("Alpine")
     app.logger.info(f'CONTAINER {repo} STARTED')
+    
+    end_time = datetime.datetime.now()
+    update_build_status(org, repo, "finished", start_time, end_time, state)
+    
     if commit_id:
         update_status(org, repo, repo_lower, commit_id, state)
 

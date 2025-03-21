@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Status Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .status-success { color: #28a745; }
+        .status-failure { color: #dc3545; }
+        .status-running { color: #007bff; }
+        .refresh-btn { margin-left: 10px; }
+        .build-card { margin-bottom: 15px; }
+        body { padding: 20px; }
+        .timestamp { font-size: 0.8rem; color: #6c757d; }
+        .auto-refresh { margin-left: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Build Status Dashboard</h1>
+        </div>
+
+        <h2>Active Builds <span class="badge bg-primary" id="activeCount">{{ active_builds|length }}</span></h2>
+        <div class="row" id="activeBuilds">
+            {% if active_builds %}
+                {% for build in active_builds %}
+                <div class="col-md-4">
+                    <div class="card build-card">
+                        <div class="card-header d-flex justify-content-between">
+                            <strong>{{ build.org }}/{{ build.repo }}</strong>
+                            <span class="status-running">Running</span>
+                        </div>
+                        <div class="card-body">
+                            <p>Started: <span class="timestamp">{{ build.start_time.strftime('%Y-%m-%d %H:%M:%S') }}</span></p>
+                            <p>Duration: <span id="duration-{{ loop.index }}">
+                                {{ ((now - build.start_time).total_seconds() / 60)|int }} mins 
+                                {{ ((now - build.start_time).total_seconds() % 60)|int }} secs
+                            </span></p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <p>No active builds</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <h2 class="mt-5">Build History <span class="badge bg-secondary" id="historyCount">{{ build_history|length }}</span></h2>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Repository</th>
+                        <th>Status</th>
+                        <th>Started</th>
+                        <th>Finished</th>
+                        <th>Duration</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTable">
+                    {% if build_history %}
+                        {% for build in build_history %}
+                        <tr>
+                            <td>{{ build.org }}/{{ build.repo }}</td>
+                            <td>
+                                {% if build.state == 'success' %}
+                                <span class="status-success">Success</span>
+                                {% else %}
+                                <span class="status-failure">Failed</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ build.start_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ build.end_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ (build.duration / 60)|int }} mins {{ (build.duration % 60)|int }} secs</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">No build history available</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Auto refresh functionality
+        setInterval(() => {
+            window.location.reload();
+        }, 10000);
+        
+        // Real-time duration update for active builds
+        function updateDurations() {
+            const startTimes = [
+                {% for build in active_builds %}
+                new Date("{{ build.start_time.isoformat() }}"),
+                {% endfor %}
+            ];
+            
+            setInterval(() => {
+                const now = new Date();
+                startTimes.forEach((startTime, index) => {
+                    const durationElement = document.getElementById(`duration-${index + 1}`);
+                    if (durationElement) {
+                        const durationSecs = Math.floor((now - startTime) / 1000);
+                        const mins = Math.floor(durationSecs / 60);
+                        const secs = durationSecs % 60;
+                        durationElement.textContent = `${mins} mins ${secs} secs`;
+                    }
+                });
+            }, 1000);
+        }
+        
+        updateDurations();
+    </script>
+</body>
+</html>
