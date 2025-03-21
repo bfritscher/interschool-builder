@@ -52,12 +52,17 @@
       .spacer {
         flex: 1;
       }
+      h1 span,
+      h1 span a {
+        color: #007cb7;
+        font-size: 12pt;
+      }
     </style>
     <script defer data-domain="builder.rxq.ch" src="https://plausible.bf0.ch/js/script.outbound-links.js"></script>
   </head>
 
   <body>
-    <h1>HES-SO - 65-41 Inter-school Software Development</h1>
+    <h1>HES-SO - 65-41 Inter-school Software Development <span>(<a href="/static/videos/2023/index.html">2023</a>, <a href="/static/videos/2024/index.html">2024</a>)</span></h1>
 
     <div id="preview" class="noMobile">
       {% for project in projects %}
