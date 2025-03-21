@@ -160,6 +160,46 @@
     .fade-move:nth-child(15) {
       transition: transform 0.4s 1.5s cubic-bezier(0.77, 0, 0.175, 1);
     }
+
+    .placeholder {
+      background-color: #333;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #666;
+      font-size: 1.2rem;
+    }
+
+    .placeholder-text {
+      text-align: center;
+    }
+
+    .load-more {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #007cb7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    .load-more:hover {
+      background-color: #005a85;
+    }
+
+    .loading-status {
+      text-align: center;
+      margin: 10px 0;
+      color: #aaa;
+    }
   </style>
 </head>
 
@@ -167,8 +207,12 @@
   <div id="app">
     <div class="video-grid">
       <transition-group tag="div" name="fade" class="video-grid">
-        <my-video v-for="v in videos" :key="v.src" :v="v" @ended="ended(v)" :playback-rate="playbackRate"></my-video>
+        <my-video v-for="v in displayedVideos" :key="v.src" :v="v" @ended="ended(v)" :playback-rate="playbackRate" @loaded="handleVideoLoaded"></my-video>
+        <video-placeholder v-for="p in placeholders" :key="p.id" :name="p.name"></video-placeholder>
       </transition-group>
+    </div>
+    <div class="loading-status" v-if="loadedCount < totalVideos">
+      Loaded {{ loadedCount }} of {{ totalVideos }} videos
     </div>
     <div>
       <label>PlaybackRate: {{playbackRate}}
@@ -184,7 +228,7 @@
 
     const MyVideo = {
       props: ["v", "playbackRate"],
-      emit: ["ended"],
+      emit: ["ended", "loaded"],
       template: `<div class="container">
             <div class="video-container">
               <h2>{{v.name}}</h2>
@@ -196,6 +240,7 @@
                 muted
                 controls
                 @ended="ended"
+                @loadeddata="videoLoaded"
               ></video>
             </div>
           </div>`,
@@ -212,6 +257,9 @@
           this.$refs.video.play();
           this.$emit("ended");
         },
+        videoLoaded() {
+          this.$emit("loaded", this.v);
+        }
       },
       watch: {
         playbackRate() {
@@ -220,12 +268,24 @@
       },
     };
 
+    const VideoPlaceholder = {
+      props: ["name"],
+      template: `<div class="container">
+            <div class="video-container">
+              <h2>{{name}}</h2>
+              <div class="placeholder">
+                <div class="placeholder-text">Loading...</div>
+              </div>
+            </div>
+          </div>`,
+    };
+
     createApp({
       components: {
         MyVideo,
+        VideoPlaceholder
       },
       data() {
-        const videos = [];
         const files = [
           'g-01-VueJsGoats_cap.mp4',
           'g-02-InterBoyz_EasyStay_cap.mp4',
@@ -254,33 +314,111 @@
           'g-25-video-presentation-finale_cap.mp4',
           'g-26-VideoBSKJrooms_cap.mp4',
           'g-27-Video_g27-AirbnbStudents_2024_cap.mp4',
-        ]
-        for (let i = 0; i < files.length; i++) {
-          const v = {
-            src: files[i],
-            isFirst: false,
-            name: files[i].slice(2, 4),
+        ];
+
+        // Prepare video structures with loading states
+        const allVideos = files.map((file, index) => {
+          return {
+            src: file,
+            isFirst: index === 0,
+            name: file.slice(2, 4),
+            loaded: false,
+            index: index
           };
-          if (i == 0) {
-            v.isFirst = true;
-          }
-          videos.push(v);
-        }
+        });
+
         return {
-          videos,
+          allVideos,
+          displayedVideos: [],
+          placeholders: [],
+          pendingVideoIndexes: [],
           playbackRate: 1,
           cols: 3,
+          loadedCount: 0,
+          totalVideos: files.length,
+          isLoading: false,
+          initialVideosToLoad: 6,
+          maxConcurrentLoads: 3
         };
       },
+      created() {
+        // Initialize placeholders for all videos
+        this.placeholders = this.allVideos.map((video, index) => {
+          return {
+            id: `placeholder-${index}`,
+            name: video.name,
+            index: index
+          };
+        });
+        
+        // Start loading immediately
+        this.startLoading();
+      },
       methods: {
+        startLoading() {
+          // Initialize with first few videos
+          for (let i = 0; i < Math.min(this.initialVideosToLoad, this.totalVideos); i++) {
+            this.loadVideo(i);
+          }
+        },
+        
+        loadVideo(index) {
+          if (index >= this.allVideos.length) return;
+          
+          // Check if this video is already loaded or pending
+          const video = this.allVideos[index];
+          if (video.loaded || this.pendingVideoIndexes.includes(index)) return;
+          
+          // Mark this video as pending load
+          this.pendingVideoIndexes.push(index);
+          
+          // Load the video with a tiny delay to prevent UI blocking
+          setTimeout(() => {
+            // Add video to displayed videos
+            video.loaded = true;
+            this.displayedVideos.push(video);
+            this.loadedCount++;
+            
+            // Remove from pending
+            const pendingIndex = this.pendingVideoIndexes.indexOf(index);
+            if (pendingIndex !== -1) {
+              this.pendingVideoIndexes.splice(pendingIndex, 1);
+            }
+            
+            // Remove placeholder
+            const placeholderIndex = this.placeholders.findIndex(p => p.index === index);
+            if (placeholderIndex !== -1) {
+              this.placeholders.splice(placeholderIndex, 1);
+            }
+          }, 10); // Very small delay to prevent browser from freezing
+        },
+        
+        handleVideoLoaded(video) {
+          // When a video is loaded, try to load more videos if we're under the concurrent limit
+          if (this.pendingVideoIndexes.length < this.maxConcurrentLoads && 
+              this.loadedCount < this.totalVideos) {
+            
+            // Find the next unloaded video index
+            let nextIndex = 0;
+            while (nextIndex < this.allVideos.length) {
+              if (!this.allVideos[nextIndex].loaded && 
+                  !this.pendingVideoIndexes.includes(nextIndex)) {
+                this.loadVideo(nextIndex);
+                break;
+              }
+              nextIndex++;
+            }
+          }
+        },
+        
         ended(v) {
           if (v.isFirst) {
             v.isFirst = false;
-            this.videos.push(v);
-            this.videos.shift();
-            this.videos[0].isFirst = true;
+            this.displayedVideos.push(v);
+            this.displayedVideos.shift();
+            this.displayedVideos[0].isFirst = true;
           }
-        },
+        }
       },
       watch: {
         cols() {
@@ -288,7 +426,7 @@
             "--width",
             `${Math.round(100 / this.cols)}%`
           );
-        },
+        }
       },
     }).mount("#app");
   </script>
