@@ -14,6 +14,9 @@
         body { padding: 20px; }
         .timestamp { font-size: 0.8rem; color: #6c757d; }
         .auto-refresh { margin-left: 15px; }
+        .commit-id { font-family: monospace; font-size: 0.85rem; }
+        .commit-link { color: #0366d6; text-decoration: none; }
+        .commit-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -38,6 +41,14 @@
                                 {{ ((now - build.start_time).total_seconds() / 60)|int }} mins 
                                 {{ ((now - build.start_time).total_seconds() % 60)|int }} secs
                             </span></p>
+                            {% if build.commit_id %}
+                            <p>Commit: 
+                                <a href="https://github.com/{{ build.org }}/{{ build.repo }}/commit/{{ build.commit_id }}" 
+                                   target="_blank" class="commit-link">
+                                    <span class="commit-id">{{ build.commit_id[:8] }}</span>
+                                </a>
+                            </p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -55,6 +66,7 @@
                 <thead>
                     <tr>
                         <th>Repository</th>
+                        <th>Commit</th>
                         <th>Status</th>
                         <th>Started</th>
                         <th>Finished</th>
@@ -66,6 +78,16 @@
                         {% for build in build_history %}
                         <tr>
                             <td>{{ build.org }}/{{ build.repo }}</td>
+                            <td>
+                                {% if build.commit_id %}
+                                <a href="https://github.com/{{ build.org }}/{{ build.repo }}/commit/{{ build.commit_id }}" 
+                                   target="_blank" class="commit-link">
+                                    <span class="commit-id">{{ build.commit_id[:8] }}</span>
+                                </a>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if build.state == 'success' %}
                                 <span class="status-success">Success</span>
@@ -80,7 +102,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="5" class="text-center">No build history available</td>
+                            <td colspan="6" class="text-center">No build history available</td>
                         </tr>
                     {% endif %}
                 </tbody>
@@ -92,7 +114,7 @@
         // Auto refresh functionality
         setInterval(() => {
             window.location.reload();
-        }, 10000);
+                        }, 10000);
         
         // Real-time duration update for active builds
         function updateDurations() {

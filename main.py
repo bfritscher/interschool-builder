@@ -6,6 +6,7 @@ import time
 import logging
 import datetime
 from threading import Thread, Lock
+from datetime import timezone, timedelta
 
 
 from flask import Flask, request, render_template, jsonify
@@ -26,8 +27,11 @@ build_history = []
 build_lock = Lock()
 MAX_HISTORY = 50  # Maximum number of builds to keep in history
 
+# Set timezone (UTC+1)
+SERVER_TZ = timezone(timedelta(hours=1))
+
 # Function to update build status
-def update_build_status(org, repo, status, start_time=None, end_time=None, state=None):
+def update_build_status(org, repo, status, start_time=None, end_time=None, state=None, commit_id=None):
     with build_lock:
         build_id = f"{org}/{repo}"
         
@@ -36,14 +40,15 @@ def update_build_status(org, repo, status, start_time=None, end_time=None, state
                 "org": org,
                 "repo": repo,
                 "status": "building",
-                "start_time": start_time or datetime.datetime.now(),
-                "state": "running"
+                "start_time": start_time or datetime.datetime.now(SERVER_TZ),
+                "state": "running",
+                "commit_id": commit_id
             }
         elif status == "finished":
             if build_id in build_threads:
                 build_info = build_threads[build_id]
                 build_info["status"] = "completed"
-                build_info["end_time"] = end_time or datetime.datetime.now()
+                build_info["end_time"] = end_time or datetime.datetime.now(SERVER_TZ)
                 build_info["duration"] = (build_info["end_time"] - build_info["start_time"]).total_seconds()
                 build_info["state"] = state or "unknown"
                 
@@ -125,13 +130,13 @@ def status_page():
     return render_template('status.html', 
                           active_builds=active_builds, 
                           build_history=history, 
-                          now=datetime.datetime.now())
+                          now=datetime.datetime.now(SERVER_TZ))
 
 
 def build(org, repo, override='', commit_id=None):
     repo_lower = repo.lower().replace(CHECK_PREFIX, '')
-    start_time = datetime.datetime.now()
-    update_build_status(org, repo, "started", start_time)
+    start_time = datetime.datetime.now(SERVER_TZ)
+    update_build_status(org, repo, "started", start_time, commit_id=commit_id)
 
     image_name = repo
     workdir = f'/app/data/{repo}{override[:-1]}'
@@ -209,8 +214,8 @@ def build(org, repo, override='', commit_id=None):
     state = run_build_cmd("Alpine")
     app.logger.info(f'CONTAINER {repo} STARTED')
     
-    end_time = datetime.datetime.now()
-    update_build_status(org, repo, "finished", start_time, end_time, state)
+    end_time = datetime.datetime.now(SERVER_TZ)
+    update_build_status(org, repo, "finished", start_time, end_time, state, commit_id)
     
     if commit_id:
         update_status(org, repo, repo_lower, commit_id, state)

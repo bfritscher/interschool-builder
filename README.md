@@ -14,7 +14,7 @@ Below, you will find detailed instructions on how the builder operates and sets 
 - **Development Server**: Runs Django using **Python 3.13** on the development server, allowing error messages to be visible on the test site.
 - **Superadmin Creation**: A default superadmin account is created (`username: autoadmin`, `password: heg`) for initial access, but your users should be populated with fixtures.
 - **Email Interception**: Configures a special email server to capture all outgoing emails, which can be accessed and reviewed at [https://mail.rxq.ch/](https://mail.rxq.ch/).
-- **Build Info**: Commit of the files used is available at `/build.html`
+- **Build Info**: Commit of the files used is available at `/static/build.html` in django
 
 ## Additional Information
 
