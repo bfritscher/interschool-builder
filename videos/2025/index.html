@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+  <title>HES-SO 2025 - 65-41 Inter-school Software Development</title>
+  <style>
+    :root {
+      --width: 33%;
+    }
+
+    body {
+      font-family: 'Open Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      color: white;
+      overflow: auto;
+      scrollbar-width: none;
+      /* hide scrollbar for Firefox */
+      -ms-overflow-style: none;
+      /* hide scrollbar for IE and Edge */
+    }
+
+    /* hide scrollbar for Chrome and Safari */
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    .video-grid {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .container {
+      width: var(--width);
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%;
+      /* 16:9 aspect ratio */
+      overflow: hidden;
+    }
+
+    .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    h1 {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      color: #007cb7;
+      margin: 0;
+      text-shadow: 1px 1px 2px white;
+      pointer-events: none;
+    }
+
+    h2 {
+      color: white;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      z-index: 999;
+      margin: 0;
+      text-transform: uppercase;
+      text-shadow: 3px 2px 2px black;
+    }
+
+    .fade-enter {
+      opacity: 0;
+    }
+
+    .fade-enter-active {
+      transition: all 1s;
+    }
+
+    .fade-leave-active {
+      transition: all 0.3s;
+      opacity: 0;
+      transform: translateY(0);
+      position: absolute;
+    }
+
+    .fade-move {
+      transition: all 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(1) {
+      transition: transform 0.4s 0.1s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(2) {
+      transition: transform 0.4s 0.2s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(3) {
+      transition: transform 0.4s 0.3s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(4) {
+      transition: transform 0.4s 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(5) {
+      transition: transform 0.4s 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(6) {
+      transition: transform 0.4s 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(7) {
+      transition: transform 0.4s 0.7s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(8) {
+      transition: transform 0.4s 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(9) {
+      transition: transform 0.4s 0.9s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(10) {
+      transition: transform 0.4s 1s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(11) {
+      transition: transform 0.4s 1.1s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(12) {
+      transition: transform 0.4s 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(13) {
+      transition: transform 0.4s 1.3s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(14) {
+      transition: transform 0.4s 1.4s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .fade-move:nth-child(15) {
+      transition: transform 0.4s 1.5s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .placeholder {
+      background-color: #333;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #666;
+      font-size: 1.2rem;
+    }
+
+    .placeholder-text {
+      text-align: center;
+    }
+
+    .load-more {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #007cb7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Open Sans', sans-serif;
+    }
+
+    .load-more:hover {
+      background-color: #005a85;
+    }
+
+    .loading-status {
+      text-align: center;
+      margin: 10px 0;
+      color: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="video-grid">
+      <transition-group tag="div" name="fade" class="video-grid">
+        <my-video v-for="v in displayedVideos" :key="v.src" :v="v" @ended="ended(v)" :playback-rate="playbackRate" @loaded="handleVideoLoaded"></my-video>
+        <video-placeholder v-for="p in placeholders" :key="p.id" :name="p.name"></video-placeholder>
+      </transition-group>
+    </div>
+    <div class="loading-status" v-if="loadedCount < totalVideos">
+      Loaded {{ loadedCount }} of {{ totalVideos }} videos
+    </div>
+    <div>
+      <label>PlaybackRate: {{playbackRate}}
+        <input v-model.number="playbackRate" type="range" min="0" max="3" step="0.5" /></label>
+      <label>Columns: {{cols}}
+        <input v-model.number="cols" type="range" min="1" max="5" step="1" /></label>
+      <h1>HES-SO 2025 - 65-41 Inter-school Software Development</h1>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createApp } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+
+    const MyVideo = {
+      props: ["v", "playbackRate"],
+      emit: ["ended", "loaded"],
+      template: `<div class="container">
+            <div class="video-container">
+              <h2>{{v.name}}</h2>
+              <video
+                ref="video"
+                class="video"
+                :src="v.src"
+                autoplay
+                muted
+                controls
+                @ended="ended"
+                @loadeddata="videoLoaded"
+              ></video>
+            </div>
+          </div>`,
+      data() {
+        return {
+          video: undefined,
+        };
+      },
+      mounted() {
+        this.$refs.video.playbackRate = this.playbackRate;
+      },
+      methods: {
+        ended() {
+          this.$refs.video.play();
+          this.$emit("ended");
+        },
+        videoLoaded() {
+          this.$emit("loaded", this.v);
+        }
+      },
+      watch: {
+        playbackRate() {
+          this.$refs.video.playbackRate = this.playbackRate;
+        },
+      },
+    };
+
+    const VideoPlaceholder = {
+      props: ["name"],
+      template: `<div class="container">
+            <div class="video-container">
+              <h2>{{name}}</h2>
+              <div class="placeholder">
+                <div class="placeholder-text">Loading...</div>
+              </div>
+            </div>
+          </div>`,
+    };
+
+    createApp({
+      components: {
+        MyVideo,
+        VideoPlaceholder
+      },
+      data() {
+        const files = [
+'g-01-Gimli - Video_cap.mp4',
+'g-02-yesteam-AppTourVideo_cap.mp4',
+'g-03-SwissTeamVid_cap.mp4',
+'g-04-68cm_cap.mp4',
+'g-05-Cinquo_cap.mp4',
+'g-06-MarkeTech_cap.mp4',
+'g-07-Racoon_cap.mp4',
+'g-08-PANI_cap.mp4',
+'g-09-SV2L_cap.mp4',
+'g-10-F2VCrew-Jobnest_cap.mp4',
+'g-11-multikick_cap.mp4',
+'g-12-TAMA_cap.mp4',
+'g-13-TheCodeLords_cap.mp4',
+'g-14-Gustave_cap.mp4',
+'g-15-TheQuinze_cap.mp4',
+'g-16-marketplace_cap.mp4',
+'g-17-JOB MARKETPLACE_cap.mp4',
+'g-18-Interschool-Video-Project_cap.mp4',
+'g-19-dreamteam_cap.mp4',
+'g-20-teamname_cap.mp4',
+'g-21-RealJobs_cap.mp4',
+'g-22-Jobsy_cap.mp4',
+'g-23-PresentationVideo_cap.mp4',
+'g-24-VideoGroup24_cap.mp4',
+'g-25-HESJob_cap.mp4',
+'g-26-WorkKey_cap.mp4',
+        ];
+
+        // Prepare video structures with loading states
+        const allVideos = files.map((file, index) => {
+          return {
+            src: file,
+            isFirst: index === 0,
+            name: file.slice(2, 4),
+            loaded: false,
+            index: index
+          };
+        });
+
+        return {
+          allVideos,
+          displayedVideos: [],
+          placeholders: [],
+          pendingVideoIndexes: [],
+          playbackRate: 1,
+          cols: 3,
+          loadedCount: 0,
+          totalVideos: files.length,
+          isLoading: false,
+          initialVideosToLoad: 6,
+          maxConcurrentLoads: 3
+        };
+      },
+      created() {
+        // Initialize placeholders for all videos
+        this.placeholders = this.allVideos.map((video, index) => {
+          return {
+            id: `placeholder-${index}`,
+            name: video.name,
+            index: index
+          };
+        });
+        
+        // Start loading immediately
+        this.startLoading();
+      },
+      methods: {
+        startLoading() {
+          // Initialize with first few videos
+          for (let i = 0; i < Math.min(this.initialVideosToLoad, this.totalVideos); i++) {
+            this.loadVideo(i);
+          }
+        },
+        
+        loadVideo(index) {
+          if (index >= this.allVideos.length) return;
+          
+          // Check if this video is already loaded or pending
+          const video = this.allVideos[index];
+          if (video.loaded || this.pendingVideoIndexes.includes(index)) return;
+          
+          // Mark this video as pending load
+          this.pendingVideoIndexes.push(index);
+          
+          // Load the video with a tiny delay to prevent UI blocking
+          setTimeout(() => {
+            // Add video to displayed videos
+            video.loaded = true;
+            this.displayedVideos.push(video);
+            this.loadedCount++;
+            
+            // Remove from pending
+            const pendingIndex = this.pendingVideoIndexes.indexOf(index);
+            if (pendingIndex !== -1) {
+              this.pendingVideoIndexes.splice(pendingIndex, 1);
+            }
+            
+            // Remove placeholder
+            const placeholderIndex = this.placeholders.findIndex(p => p.index === index);
+            if (placeholderIndex !== -1) {
+              this.placeholders.splice(placeholderIndex, 1);
+            }
+          }, 10); // Very small delay to prevent browser from freezing
+        },
+        
+        handleVideoLoaded(video) {
+          // When a video is loaded, try to load more videos if we're under the concurrent limit
+          if (this.pendingVideoIndexes.length < this.maxConcurrentLoads && 
+              this.loadedCount < this.totalVideos) {
+            
+            // Find the next unloaded video index
+            let nextIndex = 0;
+            while (nextIndex < this.allVideos.length) {
+              if (!this.allVideos[nextIndex].loaded && 
+                  !this.pendingVideoIndexes.includes(nextIndex)) {
+                this.loadVideo(nextIndex);
+                break;
+              }
+              nextIndex++;
+            }
+          }
+        },
+        
+        ended(v) {
+          if (v.isFirst) {
+            v.isFirst = false;
+            this.displayedVideos.push(v);
+            this.displayedVideos.shift();
+            this.displayedVideos[0].isFirst = true;
+          }
+        }
+      },
+      watch: {
+        cols() {
+          document.documentElement.style.setProperty(
+            "--width",
+            `${Math.round(100 / this.cols)}%`
+          );
+        }
+      },
+    }).mount("#app");
+  </script>
+</body>
+
+</html>
