@@ -1,4 +1,4 @@
-FROM node:22 AS frontend
+FROM node:24 AS frontend
 WORKDIR /app
 COPY package.json /app/package.json
 RUN npm install
@@ -6,7 +6,7 @@ COPY . /app
 RUN sed -i 's/baseURL: .*/baseURL: "\/api",/' src/services/api.js
 RUN npm run build
 
-FROM python:3.13-alpine
+FROM python:3.14-alpine
 ENV DJANGO_SUPERUSER_USERNAME=autoadmin
 ENV DJANGO_SUPERUSER_EMAIL=autoadmin@example.com
 ENV DJANGO_SUPERUSER_PASSWORD=heg
